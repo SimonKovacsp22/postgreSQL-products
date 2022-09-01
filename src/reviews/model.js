@@ -2,30 +2,24 @@ import sequelize from "../db/index.js";
 
 import { DataTypes } from "sequelize";
 
-const Product = sequelize.define(
-  "product",
+const Review = sequelize.define(
+  "review",
   {
     id: {
       primaryKey: true,
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
     },
-    name: {
-      type: DataTypes.STRING,
+    text: {
+      type: DataTypes.TEXT,
       allowNull: false,
     },
-    descrition:{
-        type: DataTypes.STRING,
-        allowNull: true,
-    },
-    price: {
+
+    rating: {
       type: DataTypes.FLOAT,
       allowNull: false,
-    },
-    image: {
-      type: DataTypes.STRING,
-    },
+    }
   }
 );
 
-export default Product;
+export default Review;

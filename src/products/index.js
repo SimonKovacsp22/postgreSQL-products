@@ -2,6 +2,9 @@ import express, { query } from 'express'
 import ProductModel from './model.js'
 import sequelize from '../db/index.js'
 import { Op } from 'sequelize'
+import CategoryModel from '../categories/model.js'
+import ReviewModel from '../reviews/model.js'
+import ProductCategoryModel from '../productCategory/model.js'
 
 const productsRouter = express.Router()
 
@@ -28,6 +31,10 @@ productsRouter.get('/', async (req,res,next) => {
          }
         // attributes:['id',"name",'description',"price",'category','createdAt','updatedAt'],
         const products = await ProductModel.findAll({
+          include:[ CategoryModel,ReviewModel],
+           
+            
+          
             
             where: query
         })
@@ -54,7 +61,21 @@ productsRouter.get("/:id", async (req, res, next) => {
 
 productsRouter.post("/", async (req, res, next) => {
     try {
-      const prod = await ProductModel.create(req.body);
+      const prod = await ProductModel.create({
+        name: req.body.name,
+        description: req.body.description,
+        price: req.body.price,
+        image:req.body.image,
+      });
+
+      if(prod.id) {
+        const data = req.body.category.map((c) =>( {
+          categoryId: categoryId,
+          productId: prod.id
+        }))
+      }
+
+      await ProductCategoryModel.bulkCreate(data)
   
       res.send(prod);
     } catch (error) {
@@ -88,6 +109,20 @@ productsRouter.post("/", async (req, res, next) => {
         },
       });
       res.send({ rows: products });
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  });
+
+  productsRouter.post("/:productId/add/:categoryId", async (req, res, next) => {
+    try {
+      const result = await ProductCategoryModel.create({
+        categoryId: req.params.categoryId,
+        productId: req.params.productId,
+      });
+  
+      res.send(result);
     } catch (error) {
       console.log(error);
       next(error);

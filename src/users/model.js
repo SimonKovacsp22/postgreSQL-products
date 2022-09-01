@@ -2,8 +2,8 @@ import sequelize from "../db/index.js";
 
 import { DataTypes } from "sequelize";
 
-const Product = sequelize.define(
-  "product",
+const User = sequelize.define(
+  "user",
   {
     id: {
       primaryKey: true,
@@ -14,18 +14,18 @@ const Product = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    descrition:{
+    surname:{
         type: DataTypes.STRING,
         allowNull: true,
     },
-    price: {
+    age: {
       type: DataTypes.FLOAT,
       allowNull: false,
     },
-    image: {
+    email: {
       type: DataTypes.STRING,
     },
   }
 );
 
-export default Product;
+export default User;
