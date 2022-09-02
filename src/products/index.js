@@ -31,7 +31,14 @@ productsRouter.get('/', async (req,res,next) => {
          }
         // attributes:['id',"name",'description',"price",'category','createdAt','updatedAt'],
         const products = await ProductModel.findAll({
-          include:[ CategoryModel,ReviewModel],
+          include:[ {
+            model: CategoryModel,
+            attributes:["name"],
+            through:{attributes:[]}
+          },{
+            model: ReviewModel,
+            attributes:["text","rating"]
+          }],
            
             
           
@@ -58,6 +65,20 @@ productsRouter.get("/:id", async (req, res, next) => {
     }
   });
 
+  productsRouter.get("/:id/reviews", async (req, res, next) => {
+    try {
+     
+      const reviews= await ReviewModel.findAll({
+        where: {
+          productId:{[Op.eq]:req.params.id} 
+        }
+      });
+      res.send(reviews);
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  });
 
 productsRouter.post("/", async (req, res, next) => {
     try {
@@ -69,13 +90,14 @@ productsRouter.post("/", async (req, res, next) => {
       });
 
       if(prod.id) {
-        const data = req.body.category.map((c) =>( {
-          categoryId: categoryId,
+        const dataToInsert = req.body.category.map((cId) =>( {
+          categoryId: cId,
           productId: prod.id
         }))
+        await ProductCategoryModel.bulkCreate(dataToInsert)
       }
 
-      await ProductCategoryModel.bulkCreate(data)
+      
   
       res.send(prod);
     } catch (error) {
@@ -118,8 +140,8 @@ productsRouter.post("/", async (req, res, next) => {
   productsRouter.post("/:productId/add/:categoryId", async (req, res, next) => {
     try {
       const result = await ProductCategoryModel.create({
-        categoryId: req.params.categoryId,
-        productId: req.params.productId,
+          categoryId: req.params.categoryId,
+          productId: req.params.productId
       });
   
       res.send(result);
@@ -128,5 +150,22 @@ productsRouter.post("/", async (req, res, next) => {
       next(error);
     }
   });
+
+  productsRouter.delete("/:productId/remove/:categoryId", async (req, res, next) => {
+    try {
+      const instances = await ProductCategoryModel.destroy({
+        where:{
+          categoryId: req.params.categoryId,
+          productId: req.params.productId,}
+        
+      });
+  
+      res.send({rows: instances});
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  });
+
 
 export default productsRouter
