@@ -25,11 +25,19 @@ productsRouter.get('/', async (req,res,next) => {
          }
 
          if(req.query.category) {
-            query.category = {
-                [Op.in] : req.query.category.split(',')
-            }
+            const productsInCategory = await ProductCategoryModel.findAll({
+              include: [
+                {
+                  model: ProductModel, where:query
+                 
+                }],
+              where: { categoryId:req.query.category },
+              offset: req.query.skip,
+              limit: 10
+            })
+            res.send(productsInCategory)
+            return
          }
-        // attributes:['id',"name",'description',"price",'category','createdAt','updatedAt'],
         const products = await ProductModel.findAll({
           include:[ {
             model: CategoryModel,
@@ -43,7 +51,9 @@ productsRouter.get('/', async (req,res,next) => {
             
           
             
-            where: query
+            where: query,
+            offset: req.query.skip,
+            limit: 10
         })
 
         res.send(products)
@@ -130,6 +140,12 @@ productsRouter.post("/", async (req, res, next) => {
           id: req.params.id,
         },
       });
+
+       await ReviewModel.destroy({
+        where:{
+          productId: req.params.id
+        }
+      })
       res.send({ rows: products });
     } catch (error) {
       console.log(error);

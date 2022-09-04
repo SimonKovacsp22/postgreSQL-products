@@ -10,16 +10,30 @@ import userRouter from "../src/users/index.js"
 import reviewRouter from "../src/reviews/index.js"
 import ReviewModel from "../src/reviews/model.js"
 import UserModel from "../src/users/model.js"
+import CartModel from "../src/cart/model.js"
+import CartProductModel from "../src/cartProduct/model.js"
 
 
 ProductModel.belongsToMany(CategoryModel,{through: ProductCategoryModel })
 CategoryModel.belongsToMany(ProductModel,{through: ProductCategoryModel})
+ProductCategoryModel.belongsTo(ProductModel)
 
 UserModel.hasMany(ReviewModel)
 ReviewModel.belongsTo(UserModel)
 
 ProductModel.hasMany(ReviewModel)
 ReviewModel.belongsTo(ProductModel)
+
+UserModel.hasMany(CartModel)
+CartModel.belongsTo(UserModel)
+
+CartModel.belongsToMany(ProductModel,{ through: CartProductModel})
+ProductModel.belongsToMany(CartModel, {through: CartProductModel})
+CartProductModel.belongsTo(CartModel)
+
+
+
+
 const server = express()
 
 server.use(express.json())
